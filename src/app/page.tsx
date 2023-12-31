@@ -88,7 +88,7 @@ export default async function Home() {
       >
         <Image
           style={{ borderRadius: "50%" }}
-          src="/logo.svg"
+          src="logo.svg"
           width={42}
           height={42}
           alt=""
