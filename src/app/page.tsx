@@ -3,6 +3,7 @@ import { parse } from "csv/sync"
 import path from "path"
 import { useState } from "react"
 import { Game } from "./Game"
+import Image from "next/image"
 
 function shuffle<T = unknown>(array: T[]): T[] {
   let currentIndex = array.length,
@@ -77,7 +78,23 @@ export default async function Home() {
         backgroundColor: "#0f1722",
       }}
     >
-      <h4 style={{ color: "#F3BC00" }}>Snavaboo</h4>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <Image
+          style={{ borderRadius: "50%" }}
+          src="/logo.svg"
+          width={42}
+          height={42}
+          alt=""
+        />
+        <h4 style={{ color: "#F3BC00" }}>Snavaboo</h4>
+      </div>
       <Game entries={shuffle(entries)} />
     </main>
   )
