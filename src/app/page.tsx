@@ -1,95 +1,84 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+import fs from "fs/promises"
+import { parse } from "csv/sync"
+import path from "path"
+import { useState } from "react"
+import { Game } from "./Game"
 
-export default function Home() {
+function shuffle<T = unknown>(array: T[]): T[] {
+  let currentIndex = array.length,
+    randomIndex
+
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex--
+
+    // And swap it with the current element.
+    ;[array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ]
+  }
+
+  return array
+}
+
+type Record = {
+  "Informazioni cronologiche": string
+  "Parola da inserire :": string
+  "Parole da non utilizzare per far indovinare la parola in questione": string
+}
+
+export type SnavabooEntry = {
+  date: string
+  word: string
+  taboo: string[]
+}
+
+export default async function Home() {
+  const csv = await fs.readFile(
+    path.join(process.cwd(), "src", "snavaboo.csv"),
+    "utf-8"
+  )
+  const entries: SnavabooEntry[] = parse(csv, {
+    columns: true,
+    skip_empty_lines: true,
+  }).map((record: Record) => {
+    const str =
+      record[
+        "Parole da non utilizzare per far indovinare la parola in questione"
+      ]
+
+    const taboo = str.includes(",")
+      ? str.split(",")
+      : str.includes("\n")
+      ? str.split("\n")
+      : str.split("/")
+
+    return {
+      date: record["Informazioni cronologiche"],
+      word: record["Parola da inserire :"],
+      taboo: taboo.map(word => word.trim()),
+    }
+  })
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+    <main
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100vw",
+        height: "100dvh",
+        fontSize: "1.5rem",
+        color: "white",
+        backgroundColor: "#0f1722",
+      }}
+    >
+      <h4 style={{ color: "#F3BC00" }}>Snavaboo</h4>
+      <Game entries={shuffle(entries)} />
     </main>
   )
 }
